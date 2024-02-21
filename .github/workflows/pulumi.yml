@@ -75,7 +75,7 @@ jobs:
         with:
           azcliversion: 2.30.0
           inlineScript: |
-            az storage blob upload -f ${{ env.PLAN_NAME }} --overwrite true ${{ env.AZURE_STORAGE_ARGS }} -n ${{ env.PLAN_FILE }}
+            az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} --overwrite true -n ${{ env.PLAN_FILE }}
 
       - name: Plan from Azure
         uses: azure/CLI@v1
@@ -85,7 +85,7 @@ jobs:
         with:
           azcliversion: 2.30.0
           inlineScript: |
-            az storage blob upload -f ${{ env.PLAN_NAME }} ${{ env.AZURE_STORAGE_ARGS }} -n ${{ env.PLAN_FILE }}
+            az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} -n ${{ env.PLAN_FILE }}
 
       - uses: pulumi/actions@v5
         name: "Update Infrastructure"
