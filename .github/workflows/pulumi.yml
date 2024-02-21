@@ -50,7 +50,7 @@ jobs:
         with:
           azcliversion: 2.30.0
           inlineScript: |
-            az storage blob list -c ${{ vars.PULUMI_AZURE_BLOB_STORAGE_CONTAINER }} --prefix .pulumi/stacks/${{ github.event.repository.name }}
+            az storage blob list -c iac --prefix .pulumi/stacks/${{ github.event.repository.name }}
 
 
       - uses: pulumi/actions@v5
