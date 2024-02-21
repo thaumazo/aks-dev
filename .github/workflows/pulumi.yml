@@ -12,9 +12,10 @@ on:
 env:
   PLAN_NAME: pr-${{ github.event.repository }}-${{ github.event.number }}.json
   PLAN_FILE: .pulumi/stacks/${{ github.event.repository.name }}/pr-${{ github.event.repository }}-${{ github.event.number }}.json
-  AZURE_STORAGE_KEY: thaumazodev
-  AZURE_STORAGE_ACCOUNT: ${{ vars.PULUMI_AZURE_BLOB_STORAGE_ACCOUNT }}
-  
+  AZURE_STORAGE_NAME: thaumazodev
+  BLOB_ENDPOINT: https://thaumazodev.blob.core.windows.net/iac
+  BLOB_CONTAINER: iac
+
 
 permissions:
       id-token: write
@@ -50,7 +51,7 @@ jobs:
         with:
           azcliversion: 2.30.0
           inlineScript: |
-            az storage blob list -c iac --prefix .pulumi/stacks/${{ github.event.repository.name }}
+            az storage blob list -c iac --blob-endpoint ${{ env.BLOB_ENDPOINT }} --prefix .pulumi/stacks/${{ github.event.repository.name }}
 
 
       - uses: pulumi/actions@v5
