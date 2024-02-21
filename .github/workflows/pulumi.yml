@@ -8,7 +8,7 @@ on:
       - main
     types:
       - closed
-      - synched
+      - synchronize
       - opened
     
 env:
