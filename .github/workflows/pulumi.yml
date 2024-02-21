@@ -47,7 +47,7 @@ jobs:
         with:
           azcliversion: 2.30.0
           inlineScript: |
-            az storage blob list -c iac --account-name thaumazo-dev --prefix .pulumi/stacks/${{ github.event.repository.name }}
+            az storage blob list -c iac --account-name thaumazodev --prefix .pulumi/stacks/${{ github.event.repository.name }}
 
       - name: 'Install'
         run: |
