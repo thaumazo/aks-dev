@@ -19,7 +19,7 @@ resource_group = resources.ResourceGroup("azure-native-py-aks")
 ad_app = azuread.Application("aks-dev", display_name="aks")
 ad_sp = azuread.ServicePrincipal("aks-dev-principal", client_id=ad_app.client_id)
 
-#random.RandomPassword("password", length=20, special=True)
+# random.RandomPassword("password", length=20, special=True)
 
 # Create the Service Principal Password
 ad_sp_password = azuread.ServicePrincipalPassword("aksSpPassword",
@@ -59,7 +59,7 @@ managed_cluster = containerservice.ManagedCluster(
     ),
     enable_rbac=True,
     enable_pod_security_policy=False,
-    kubernetes_version= k8sVersion,
+    kubernetes_version=k8sVersion,
     linux_profile={
         "admin_username": "aks-admin",
         "ssh": {
@@ -94,4 +94,3 @@ encoded = creds.kubeconfigs[0].value
 kubeconfig = encoded.apply(
     lambda enc: base64.b64decode(enc).decode())
 pulumi.export("kubeconfig", kubeconfig)
-
