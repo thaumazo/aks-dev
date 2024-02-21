@@ -41,9 +41,11 @@ managed_cluster = containerservice.ManagedCluster(
     managed_cluster_name,
     resource_group_name=resource_group.name,
     agent_pool_profiles=[{
-        "count": 3,
+        "count": 2,
         "max_pods": 110,
         "mode": "System",
+        "enableNodePublicIP": True,
+        "enableFIPS": True,
         "name": "agentpool",
         "node_labels": {},
         "os_disk_size_gb": 30,
@@ -51,7 +53,12 @@ managed_cluster = containerservice.ManagedCluster(
         "type": "VirtualMachineScaleSets",
         "vm_size": "Standard_DS2_v2",
     }],
+    auto_scaler_profile=containerservice.ManagedClusterPropertiesAutoScalerProfileArgs(
+        scale_down_delay_after_add="15m",
+        scan_interval="20s",
+    ),
     enable_rbac=True,
+    enable_pod_security_policy=False,
     kubernetes_version= k8sVersion,
     linux_profile={
         "admin_username": "aks-admin",
@@ -61,8 +68,18 @@ managed_cluster = containerservice.ManagedCluster(
             }],
         },
     },
+    network_profile=containerservice.ContainerServiceNetworkProfileArgs(
+        network_plugin="azure",
+        network_policy="azure",
+        service_cidr="10.17.0.0/16",
+        dns_service_ip="10.17.0.10"
+    ),
+    tags={
+        "archv2": "",
+        "tier": "development",
+    },
     dns_prefix=resource_group.name,
-    node_resource_group=f"MC_azure-native-go_{managed_cluster_name}_westus",
+    node_resource_group=f"MC_azure-native-go_{managed_cluster_name}_canadacentral",
     service_principal_profile={
         "client_id": ad_app.client_id,
         "secret": ad_sp_password.value
@@ -77,3 +94,4 @@ encoded = creds.kubeconfigs[0].value
 kubeconfig = encoded.apply(
     lambda enc: base64.b64decode(enc).decode())
 pulumi.export("kubeconfig", kubeconfig)
+
