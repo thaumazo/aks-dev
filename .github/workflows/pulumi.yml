@@ -8,7 +8,7 @@ on:
       - synchronize
       - opened
   pull_request_review:
-      types: [submitted]
+      types: [ submitted ]
     
 env:
   PLAN_NAME: pr-${{ github.event.repository }}-${{ github.event.number }}.json
