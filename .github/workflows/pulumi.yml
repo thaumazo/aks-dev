@@ -17,7 +17,7 @@ env:
   AZURE_STORAGE_NAME: thaumazodev
   BLOB_ENDPOINT: https://thaumazodev.blob.core.windows.net/iac
   BLOB_CONTAINER: iac
-  AZURE_STORAGE_ARGS: --only-show-errors -c ${{ var.PULUMI_STORAGE_BLOB_CONTAINER }} --account-name ${{ var.PULUMI_STORAGE_BLOB_ACCOUNT }}
+  AZURE_STORAGE_ARGS: --only-show-errors -c ${{ vars.PULUMI_STORAGE_BLOB_CONTAINER }} --account-name ${{ vars.PULUMI_STORAGE_BLOB_ACCOUNT }}
 
 
 permissions:
