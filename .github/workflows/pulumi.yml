@@ -12,6 +12,9 @@ on:
 env:
   PLAN_NAME: pr-${{ github.event.repository }}-${{ github.event.number }}.json
   PLAN_FILE: .pulumi/stacks/${{ github.event.repository.name }}/pr-${{ github.event.repository }}-${{ github.event.number }}.json
+  AZURE_STORAGE_KEY: thaumazodev
+  AZURE_STORAGE_ACCOUNT: ${{ vars.PULUMI_AZURE_BLOB_STORAGE_ACCOUNT }}
+  
 
 permissions:
       id-token: write
