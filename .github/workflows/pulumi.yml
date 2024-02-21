@@ -14,9 +14,6 @@ on:
 env:
   PLAN_NAME: pr-${{ github.event.repository }}-${{ github.event.number }}.json
   PLAN_FILE: .pulumi/stacks/${{ github.event.repository.name }}/pr-${{ github.event.repository }}-${{ github.event.number }}.json
-  AZURE_STORAGE_NAME: thaumazodev
-  BLOB_ENDPOINT: https://thaumazodev.blob.core.windows.net/iac
-  BLOB_CONTAINER: iac
   AZURE_STORAGE_ARGS: --only-show-errors -c ${{ vars.PULUMI_STORAGE_BLOB_CONTAINER }} --account-name ${{ vars.PULUMI_STORAGE_BLOB_ACCOUNT }}
 
 
