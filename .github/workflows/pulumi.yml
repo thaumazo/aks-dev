@@ -45,7 +45,7 @@ jobs:
         with:
           azcliversion: 2.30.0
           inlineScript: |
-            az storage blob list -c ${{ var.PULUMI_AZURE_BLOB_STORAGE_CONTAINER }} --prefix .pulumi/stacks/${{ github.event.repository.name }}
+            az storage blob list -c ${{ vars.PULUMI_AZURE_BLOB_STORAGE_CONTAINER }} --prefix .pulumi/stacks/${{ github.event.repository.name }}
 
 
       - uses: pulumi/actions@v5
@@ -68,7 +68,7 @@ jobs:
         with:
           azcliversion: 2.30.0
           inlineScript: |
-            az storage blob upload -f ${{ env.PLAN_NAME }} --overwrite true -c ${{ var.PULUMI_AZURE_BLOB_STORAGE_CONTAINER }}
+            az storage blob upload -f ${{ env.PLAN_NAME }} --overwrite true -c ${{ vars.PULUMI_AZURE_BLOB_STORAGE_CONTAINER }}
 
       - uses: pulumi/actions@v5
         name: "Update Infrastructure"
