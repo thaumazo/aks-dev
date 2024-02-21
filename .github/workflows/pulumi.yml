@@ -7,9 +7,11 @@ on:
     branches:
       - main
     types:
-      - closed
+      - approved
       - synchronize
       - opened
+  pull_request_review:
+      types: [submitted]
     
 env:
   PLAN_NAME: pr-${{ github.event.repository }}-${{ github.event.number }}.json
@@ -27,6 +29,9 @@ jobs:
     environment: development
     name: Preview
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' ||
+      github.event.review.state == 'approved'
     steps:
       - uses: actions/checkout@v4
 
