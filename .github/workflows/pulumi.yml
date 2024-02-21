@@ -42,7 +42,7 @@ jobs:
 
       - name: "Check Storage"
         uses: azure/CLI@v1
-         with:
+        with:
           azcliversion: 2.30.0
           inlineScript: |
             az storage blob list -c ${{ var.PULUMI_AZURE_BLOB_STORAGE_CONTAINER }} --prefix .pulumi/stacks/${{ github.event.repository.name }}
