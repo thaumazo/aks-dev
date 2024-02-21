@@ -24,7 +24,6 @@ env:
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   ARM_USE_OIDC: true
   enable-AzPSSession: true
-  ARM_CLIENT_SECRET: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
 
 
 permissions:
@@ -68,6 +67,8 @@ jobs:
 
       - uses: pulumi/actions@v5
         name: "Preview PR"
+        env:
+          ARM_CLIENT_SECRET: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
         if: |
           github.event_name == 'pull_request' &&
           ( github.event.action == 'opened' || github.event.action == 'synchronize' )
@@ -100,6 +101,8 @@ jobs:
 
       - uses: pulumi/actions@v5
         name: "Update Infrastructure"
+        env:
+          ARM_CLIENT_SECRET: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
         if: |
           github.event.review.state == 'approved'
         with:
