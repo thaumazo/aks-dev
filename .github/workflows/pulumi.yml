@@ -14,6 +14,8 @@ env:
   PLAN_NAME: pr-${{ github.event.repository }}-${{ github.event.number }}.json
   PLAN_FILE: .pulumi/stacks/${{ github.event.repository.name }}/pr-${{ github.event.repository }}-${{ github.event.number }}.json
   AZURE_STORAGE_ARGS: --only-show-errors -c ${{ vars.PULUMI_STORAGE_BLOB_CONTAINER }} --account-name ${{ vars.PULUMI_STORAGE_BLOB_ACCOUNT }}
+  PULUMI_CONFIG_PASSPHRASE: ""
+  PULUMI_CLOUD_URL: azblob://${{ vars.PULUMI_STORAGE_BLOB_CONTAINER }}?storage_account=${{ vars.PULUMI_STORAGE_BLOB_ACCOUNT }}
 
 
 permissions:
@@ -64,6 +66,7 @@ jobs:
           command: preview
           comment-on-pr: true
           plan: ${{ env.PLAN_NAME }}
+          cloud-url: ${{ env.PULUMI_CLOUD_URL }}
           stack-name: ${{ github.event.repository.name }}
 
       - name: Plan to Azure
@@ -73,6 +76,7 @@ jobs:
           ( github.event.action == 'opened' || github.event.action == 'synched' )
         with:
           azcliversion: 2.30.0
+          cloud-url: ${{ env.PULUMI_CLOUD_URL }}
           inlineScript: |
             az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} --overwrite true -n ${{ env.PLAN_FILE }}
 
