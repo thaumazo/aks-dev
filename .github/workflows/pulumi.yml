@@ -92,7 +92,7 @@ jobs:
       - name: Merge Pull Request
         uses: juliangruber/merge-pull-request-action@v1
         if: |
-          github.event_name == 'pull_request' && \
+          github.event_name == 'pull_request' &&
           ( github.event.action == 'approved' )
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
