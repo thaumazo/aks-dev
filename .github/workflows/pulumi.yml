@@ -61,7 +61,7 @@ jobs:
         name: "Preview PR"
         if: |
           github.event_name == 'pull_request' &&
-          ( github.event.action == 'opened' || github.event.action == 'synched' )
+          ( github.event.action == 'opened' || github.event.action == 'synchronize' )
         with:
           command: preview
           comment-on-pr: true
@@ -73,7 +73,7 @@ jobs:
         uses: azure/CLI@v1
         if: |
           github.event_name == 'pull_request' &&
-          ( github.event.action == 'opened' || github.event.action == 'synched' )
+          ( github.event.action == 'opened' || github.event.action == 'synchronize' )
         with:
           azcliversion: 2.30.0
           cloud-url: ${{ env.PULUMI_CLOUD_URL }}
@@ -83,8 +83,7 @@ jobs:
       - name: Plan from Azure
         uses: azure/CLI@v1
         if: |
-          github.event_name == 'pull_request' &&
-          ( github.event.action == 'approved' )
+          github.event.review.state == 'approved'
         with:
           azcliversion: 2.30.0
           inlineScript: |
@@ -93,8 +92,7 @@ jobs:
       - uses: pulumi/actions@v5
         name: "Update Infrastructure"
         if: |
-          github.event_name == 'pull_request' &&
-          ( github.event.action == 'approved' )
+          github.event.review.state == 'approved'
         with:
           command: up
           plan: ${{ env.PLAN_NAME }}
@@ -102,8 +100,7 @@ jobs:
       - name: Merge Pull Request
         uses: juliangruber/merge-pull-request-action@v1
         if: |
-          github.event_name == 'pull_request' &&
-          ( github.event.action == 'approved' )
+          github.event.review.state == 'approved'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ github.event.number }}
