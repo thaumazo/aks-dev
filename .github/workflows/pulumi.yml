@@ -15,6 +15,7 @@ env:
   AZURE_STORAGE_NAME: thaumazodev
   BLOB_ENDPOINT: https://thaumazodev.blob.core.windows.net/iac
   BLOB_CONTAINER: iac
+  AZURE_STORAGE_ARGS: --only-show-errors -c ${{ var.PULUMI_STORAGE_BLOB_CONTAINER }} --account-name ${{ var.PULUMI_STORAGE_BLOB_ACCOUNT }}
 
 
 permissions:
@@ -47,7 +48,7 @@ jobs:
         with:
           azcliversion: 2.30.0
           inlineScript: |
-            az storage blob list -c iac --account-name thaumazodev --prefix .pulumi/stacks/${{ github.event.repository.name }}
+            az storage blob list ${{ env.AZURE_STORAGE_ARGS }} --prefix .pulumi/stacks/${{ github.event.repository.name }}
 
       - name: 'Install'
         run: |
@@ -72,7 +73,7 @@ jobs:
         with:
           azcliversion: 2.30.0
           inlineScript: |
-            az storage blob upload -f ${{ env.PLAN_NAME }} --overwrite true -c ${{ vars.PULUMI_AZURE_BLOB_STORAGE_CONTAINER }} -n ${{ env.PLAN_FILE }}
+            az storage blob upload -f ${{ env.PLAN_NAME }} --overwrite true ${{ env.AZURE_STORAGE_ARGS }} -n ${{ env.PLAN_FILE }}
 
       - name: Plan from Azure
         uses: azure/CLI@v1
@@ -82,7 +83,7 @@ jobs:
         with:
           azcliversion: 2.30.0
           inlineScript: |
-            az storage blob upload -f ${{ env.PLAN_NAME }} -c ${{ vars.PULUMI_AZURE_BLOB_STORAGE_CONTAINER }} -n ${{ env.PLAN_FILE }}
+            az storage blob upload -f ${{ env.PLAN_NAME }} ${{ env.AZURE_STORAGE_ARGS }} -n ${{ env.PLAN_FILE }}
 
       - uses: pulumi/actions@v5
         name: "Update Infrastructure"
