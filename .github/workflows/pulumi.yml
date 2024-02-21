@@ -19,7 +19,8 @@ permissions:
       pull-requests: write
     
 jobs:
-  up:
+  Pulumi:
+    environment: development
     name: Preview
     runs-on: ubuntu-latest
     steps:
