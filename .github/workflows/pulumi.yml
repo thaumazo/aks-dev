@@ -94,7 +94,7 @@ jobs:
         if: |
           github.event.review.state == 'approved'
         with:
-          azcliversion: 2.30.0
+          azcliversion: 2.57.0
           inlineScript: |
             az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} -n ${{ env.PLAN_FILE }}
 
