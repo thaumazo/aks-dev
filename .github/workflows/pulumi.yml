@@ -86,7 +86,6 @@ jobs:
           ( github.event.action == 'opened' || github.event.action == 'synchronize' )
         with:
           azcliversion: 2.30.0
-          cloud-url: ${{ env.PULUMI_CLOUD_URL }}
           inlineScript: |
             az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} --overwrite true -n ${{ env.PLAN_FILE }}
 
@@ -107,6 +106,7 @@ jobs:
           github.event.review.state == 'approved'
         with:
           command: up
+          cloud-url: ${{ env.PULUMI_CLOUD_URL }}
           plan: ${{ env.PLAN_NAME }}
 
       - name: Merge Pull Request
