@@ -24,6 +24,7 @@ env:
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   ARM_USE_OIDC: true
   enable-AzPSSession: true
+  AZURE_CLI_VERSION: 2.57.0
 
 
 permissions:
@@ -57,7 +58,7 @@ jobs:
       - name: "Check Storage"
         uses: azure/CLI@v1
         with:
-          azcliversion: 2.30.0
+          azcliversion: ${{ env.AZURE_CLI_VERSION }}
           inlineScript: |
             az storage blob list ${{ env.AZURE_STORAGE_ARGS }} --prefix .pulumi/stacks/${{ github.event.repository.name }}
 
@@ -85,7 +86,7 @@ jobs:
           github.event_name == 'pull_request' &&
           ( github.event.action == 'opened' || github.event.action == 'synchronize' )
         with:
-          azcliversion: 2.30.0
+          azcliversion: ${{ env.AZURE_CLI_VERSION }}
           inlineScript: |
             az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} --overwrite true -n ${{ env.PLAN_FILE }}
 
@@ -94,7 +95,7 @@ jobs:
         if: |
           github.event.review.state == 'approved'
         with:
-          azcliversion: 2.57.0
+          azcliversion: ${{ env.AZURE_CLI_VERSION }}
           inlineScript: |
             az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} -n ${{ env.PLAN_FILE }}
 
