@@ -31,6 +31,7 @@ permissions:
       id-token: write
       contents: write
       pull-requests: write
+      statuses: write
     
 jobs:
   Pulumi:
@@ -39,8 +40,15 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'pull_request'
-    steps:
       - uses: actions/checkout@v4
+
+      - name: Mark as draft
+        if: |
+          github.event_name == 'pull_request' &&
+          ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+        uses: voiceflow/draft-pr@latest
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Run PEP8'
         uses: quentinguidee/pep8-action@v1
@@ -88,6 +96,17 @@ jobs:
           azcliversion: ${{ env.AZURE_CLI_VERSION }}
           inlineScript: |
             az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} --overwrite true -n ${{ env.PLAN_FILE }}
+
+      - name: Mark as Ready to Review
+        uses: leemeador/ready-for-review-pr@v1.0.3 # please use latest version
+        if: |
+          github.event_name == 'pull_request' &&
+          ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ github.event.number }}
+          owner: thaumazo
+          repo: ${{ github.repository.name }}
 
       - name: Plan from Azure
         uses: azure/CLI@v1
