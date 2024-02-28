@@ -4,20 +4,26 @@ on:
     branches:
       - main
   pull_request:
-    branches:
-      - main
     types:
-      - closed
-      - synched
+      - synchronize
       - opened
+      - closed
     
 env:
   PLAN_NAME: pr-${{ github.event.repository }}-${{ github.event.number }}.json
   PLAN_FILE: .pulumi/stacks/${{ github.event.repository.name }}/pr-${{ github.event.repository }}-${{ github.event.number }}.json
-  AZURE_STORAGE_NAME: thaumazodev
-  BLOB_ENDPOINT: https://thaumazodev.blob.core.windows.net/iac
-  BLOB_CONTAINER: iac
-  AZURE_STORAGE_ARGS: --only-show-errors -c ${{ var.PULUMI_STORAGE_BLOB_CONTAINER }} --account-name ${{ var.PULUMI_STORAGE_BLOB_ACCOUNT }}
+  AZURE_STORAGE_ARGS: --only-show-errors -c ${{ vars.PULUMI_STORAGE_BLOB_CONTAINER }} --account-name ${{ vars.PULUMI_STORAGE_BLOB_ACCOUNT }}
+  PULUMI_CONFIG_PASSPHRASE: ""
+  PULUMI_CLOUD_URL: azblob://${{ vars.PULUMI_STORAGE_BLOB_CONTAINER }}?storage_account=${{ vars.PULUMI_STORAGE_BLOB_ACCOUNT }}
+  AZURE_STORAGE_ACCOUNT: ${{ secrets.PULUMI_STORAGE_BLOB_ACCOUNT }}
+  AZURE_STORAGE_KEY: ${{ secrets.PULIMI_STORAGE_BLOB_CONTAINER }}
+  AZURE_KEYVAULT_AUTH_VIA_CLI: true
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_USE_OIDC: true
+  enable-AzPSSession: true
+  AZURE_CLI_VERSION: 2.57.0
 
 
 permissions:
@@ -28,8 +34,10 @@ permissions:
 jobs:
   Pulumi:
     environment: development
-    name: Preview
+    name: Pulumi change for PR
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
 
@@ -48,7 +56,7 @@ jobs:
       - name: "Check Storage"
         uses: azure/CLI@v1
         with:
-          azcliversion: 2.30.0
+          azcliversion: ${{ env.AZURE_CLI_VERSION }}
           inlineScript: |
             az storage blob list ${{ env.AZURE_STORAGE_ARGS }} --prefix .pulumi/stacks/${{ github.event.repository.name }}
 
@@ -58,51 +66,44 @@ jobs:
 
       - uses: pulumi/actions@v5
         name: "Preview PR"
+        env:
+          ARM_CLIENT_SECRET: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
         if: |
           github.event_name == 'pull_request' &&
-          ( github.event.action == 'opened' || github.event.action == 'synched' )
+          ( github.event.action == 'opened' || github.event.action == 'synchronize' )
         with:
           command: preview
           comment-on-pr: true
           plan: ${{ env.PLAN_NAME }}
+          cloud-url: ${{ env.PULUMI_CLOUD_URL }}
           stack-name: ${{ github.event.repository.name }}
 
       - name: Plan to Azure
         uses: azure/CLI@v1
         if: |
           github.event_name == 'pull_request' &&
-          ( github.event.action == 'opened' || github.event.action == 'synched' )
+          ( github.event.action == 'opened' || github.event.action == 'synchronize' )
         with:
-          azcliversion: 2.30.0
+          azcliversion: ${{ env.AZURE_CLI_VERSION }}
           inlineScript: |
-            az storage blob upload -f ${{ env.PLAN_NAME }} --overwrite true ${{ env.AZURE_STORAGE_ARGS }} -n ${{ env.PLAN_FILE }}
+            az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} --overwrite true -n ${{ env.PLAN_FILE }}
 
       - name: Plan from Azure
         uses: azure/CLI@v1
         if: |
-          github.event_name == 'pull_request' &&
-          ( github.event.action == 'approved' )
+          github.event.action == 'closed' && github.event.pull_request.merged == true
         with:
-          azcliversion: 2.30.0
+          azcliversion: ${{ env.AZURE_CLI_VERSION }}
           inlineScript: |
-            az storage blob upload -f ${{ env.PLAN_NAME }} ${{ env.AZURE_STORAGE_ARGS }} -n ${{ env.PLAN_FILE }}
+            az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} -n ${{ env.PLAN_FILE }}
 
       - uses: pulumi/actions@v5
         name: "Update Infrastructure"
+        env:
+          ARM_CLIENT_SECRET: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
         if: |
-          github.event_name == 'pull_request' &&
-          ( github.event.action == 'approved' )
+          github.event.action == 'closed' && github.event.pull_request.merged == true
         with:
           command: up
+          cloud-url: ${{ env.PULUMI_CLOUD_URL }}
           plan: ${{ env.PLAN_NAME }}
-
-      - name: Merge Pull Request
-        uses: juliangruber/merge-pull-request-action@v1
-        if: |
-          github.event_name == 'pull_request' &&
-          ( github.event.action == 'approved' )
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ github.event.number }}
-          method: squash # merge rebase
-          repo: ${{ github.repository }}
