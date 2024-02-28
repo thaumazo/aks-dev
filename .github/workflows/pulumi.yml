@@ -34,7 +34,7 @@ permissions:
 jobs:
   Pulumi:
     environment: development
-    name: Preview
+    name: Pulumi change for PR
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'pull_request'
@@ -107,13 +107,3 @@ jobs:
           command: up
           cloud-url: ${{ env.PULUMI_CLOUD_URL }}
           plan: ${{ env.PLAN_NAME }}
-
-      - name: Merge Pull Request
-        uses: juliangruber/merge-pull-request-action@v1
-        if: |
-          github.event.action == 'closed' && github.event.pull_request.merged == true
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ github.event.number }}
-          method: squash # merge rebase
-          repo: ${{ github.repository }}
