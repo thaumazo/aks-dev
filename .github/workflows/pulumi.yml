@@ -10,8 +10,8 @@ on:
       - closed
     
 env:
-  PLAN_NAME: pr-${{ github.event.number }}-${{ github.sha }}.json
-  PLAN_FILE: .pulumi/stacks/${{ github.event.repository.name }}/pr-${{ github.event.number }}-${{ github.sha }}.json
+  PLAN_NAME: pr-${{ github.event.number }}-${{ github.head_ref }}.json
+  PLAN_FILE: .pulumi/stacks/${{ github.event.repository.name }}/pr-${{ github.event.number }}-${{ github.head_ref }}.json
   AZURE_STORAGE_ARGS: --only-show-errors -c ${{ vars.PULUMI_STORAGE_BLOB_CONTAINER }} --account-name ${{ vars.PULUMI_STORAGE_BLOB_ACCOUNT }}
   PULUMI_CONFIG_PASSPHRASE: ""
   PULUMI_CLOUD_URL: azblob://${{ vars.PULUMI_STORAGE_BLOB_CONTAINER }}?storage_account=${{ vars.PULUMI_STORAGE_BLOB_ACCOUNT }}
