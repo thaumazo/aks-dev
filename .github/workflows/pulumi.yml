@@ -7,8 +7,7 @@ on:
     types:
       - synchronize
       - opened
-  pull_request_review:
-      types: [ submitted ]
+      - closed
     
 env:
   PLAN_NAME: pr-${{ github.event.repository }}-${{ github.event.number }}.json
@@ -38,8 +37,7 @@ jobs:
     name: Preview
     runs-on: ubuntu-latest
     if: |
-      github.event_name == 'pull_request' ||
-      github.event.review.state == 'approved'
+      github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
 
@@ -93,7 +91,7 @@ jobs:
       - name: Plan from Azure
         uses: azure/CLI@v1
         if: |
-          github.event.review.state == 'approved'
+          github.event.action == 'closed' && github.event.pull_request.merged == true
         with:
           azcliversion: ${{ env.AZURE_CLI_VERSION }}
           inlineScript: |
@@ -104,7 +102,7 @@ jobs:
         env:
           ARM_CLIENT_SECRET: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
         if: |
-          github.event.review.state == 'approved'
+          github.event.action == 'closed' && github.event.pull_request.merged == true
         with:
           command: up
           cloud-url: ${{ env.PULUMI_CLOUD_URL }}
@@ -113,7 +111,7 @@ jobs:
       - name: Merge Pull Request
         uses: juliangruber/merge-pull-request-action@v1
         if: |
-          github.event.review.state == 'approved'
+          github.event.action == 'closed' && github.event.pull_request.merged == true
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ github.event.number }}
