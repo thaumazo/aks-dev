@@ -18,7 +18,8 @@ resource_group = resources.ResourceGroup("azure-native-py-aks")
 
 # Create an AD service principal
 ad_app = azuread.Application("aks-dev", display_name="aks")
-ad_sp = azuread.ServicePrincipal("aks-dev-principal", client_id=ad_app.client_id)
+ad_sp = azuread.ServicePrincipal(
+    "aks-dev-principal", client_id=ad_app.client_id)
 
 # random.RandomPassword("password", length=20, special=True)
 
@@ -96,10 +97,11 @@ kubeconfig = encoded.apply(
     lambda enc: base64.b64decode(enc).decode())
 pulumi.export("kubeconfig", kubeconfig)
 
-kubernetesRepositories = [ 'aks-dev' ]
+kubernetesRepositories = ['aks-dev']
 
-repositoryIds = [ github.get_repository(name=repository).repo_id for repository in kubernetesRepositories ]
+repositoryIds = [github.get_repository(
+    name=repository).repo_id for repository in kubernetesRepositories]
 
 kubernetes_actions_secret = github.ActionsOrganizationSecret("devKubeconfig",
-    secret_name="DEV_KUBECONFIG",
-    plaintext_value=kubeconfig, visibility="selected", selected_repository_ids=repositoryIds)
+                                                             secret_name="DEV_KUBECONFIG",
+                                                             plaintext_value=kubeconfig, visibility="selected", selected_repository_ids=repositoryIds)
