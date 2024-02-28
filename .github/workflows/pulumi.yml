@@ -10,7 +10,7 @@ on:
       - closed
     
 env:
-  PLAN_NAME: pr-${{ github.event.repository }}-${{ github.event.number }}.json
+  PLAN_NAME: pr-${{ github.event.repository.name }}-${{ github.event.number }}.json
   PLAN_FILE: .pulumi/stacks/${{ github.event.repository.name }}/pr-${{ github.event.repository.name }}-${{ github.event.number }}.json
   AZURE_STORAGE_ARGS: --only-show-errors -c ${{ vars.PULUMI_STORAGE_BLOB_CONTAINER }} --account-name ${{ vars.PULUMI_STORAGE_BLOB_ACCOUNT }}
   PULUMI_CONFIG_PASSPHRASE: ""
@@ -95,7 +95,7 @@ jobs:
         with:
           azcliversion: ${{ env.AZURE_CLI_VERSION }}
           inlineScript: |
-            az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} -n ${{ env.PLAN_FILE }}
+            az storage blob download ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} -n ${{ env.PLAN_FILE }}
 
       - uses: pulumi/actions@v5
         name: "Update Infrastructure"
