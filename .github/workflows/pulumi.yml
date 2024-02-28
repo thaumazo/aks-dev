@@ -24,6 +24,7 @@ env:
   ARM_USE_OIDC: true
   enable-AzPSSession: true
   AZURE_CLI_VERSION: 2.57.0
+  GITHUB_OWNER: thaumazo
 
 
 permissions:

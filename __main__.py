@@ -7,6 +7,7 @@ from pulumi_azure_native import resources, containerservice
 import pulumi_azuread as azuread
 import pulumi_random as random
 import pulumi_tls as tls
+import pulumi_github as github
 
 config = pulumi.Config()
 
@@ -94,3 +95,11 @@ encoded = creds.kubeconfigs[0].value
 kubeconfig = encoded.apply(
     lambda enc: base64.b64decode(enc).decode())
 pulumi.export("kubeconfig", kubeconfig)
+
+kubernetesRepositories = [ 'aks-dev' ]
+
+repositoryIds = [ github.get_repository(name=repository).repo_id for repository in kubernetesRepositories ]
+
+kubernetes_actions_secret = github.ActionsOrganizationSecret("devKubeconfig",
+    secret_name="DEV_KUBECONFIG",
+    plaintext_value=kubeconfig, visibility="selected", selected_repository_ids=repositoryIds)
