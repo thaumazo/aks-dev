@@ -106,7 +106,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           pull-request-number: ${{ github.event.number }}
           owner: thaumazo
-          repo: ${{ github.repository.name }}
+          repo: ${{ github.event.repository.name }}
 
       - name: Plan from Azure
         uses: azure/CLI@v1
