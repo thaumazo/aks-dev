@@ -10,8 +10,8 @@ on:
       - closed
     
 env:
-  PLAN_NAME: pr-${{ github.event.repository }}-${{ github.event.number }}.json
-  PLAN_FILE: .pulumi/stacks/${{ github.event.repository.name }}/pr-${{ github.event.repository.name }}-${{ github.event.number }}.json
+  PLAN_NAME: pr-${{ github.event.number }}-${{ github.sha }}.json
+  PLAN_FILE: .pulumi/stacks/${{ github.event.repository.name }}/pr-${{ github.event.number }}-${{ github.sha }}.json
   AZURE_STORAGE_ARGS: --only-show-errors -c ${{ vars.PULUMI_STORAGE_BLOB_CONTAINER }} --account-name ${{ vars.PULUMI_STORAGE_BLOB_ACCOUNT }}
   PULUMI_CONFIG_PASSPHRASE: ""
   PULUMI_CLOUD_URL: azblob://${{ vars.PULUMI_STORAGE_BLOB_CONTAINER }}?storage_account=${{ vars.PULUMI_STORAGE_BLOB_ACCOUNT }}
@@ -24,12 +24,14 @@ env:
   ARM_USE_OIDC: true
   enable-AzPSSession: true
   AZURE_CLI_VERSION: 2.57.0
+  GITHUB_OWNER: thaumazo
 
 
 permissions:
       id-token: write
       contents: write
       pull-requests: write
+      statuses: write
     
 jobs:
   Pulumi:
@@ -40,11 +42,18 @@ jobs:
       github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
+      - name: Mark as draft
+        if: |
+          github.event_name == 'pull_request' &&
+          ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+        uses: voiceflow/draft-pr@latest
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Run PEP8'
         uses: quentinguidee/pep8-action@v1
         with:
-          arguments: '--max-line-length=120'
+          arguments: '--max-line-length=150'
 
       - name: "Azure Login"
         uses: azure/login@v1
@@ -88,6 +97,17 @@ jobs:
           inlineScript: |
             az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} --overwrite true -n ${{ env.PLAN_FILE }}
 
+      - name: Mark as Ready to Review
+        uses: leemeador/ready-for-review-pr@v1.0.3 # please use latest version
+        if: |
+          github.event_name == 'pull_request' &&
+          ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ github.event.number }}
+          owner: thaumazo
+          repo: ${{ github.event.repository.name }}
+
       - name: Plan from Azure
         uses: azure/CLI@v1
         if: |
@@ -95,7 +115,7 @@ jobs:
         with:
           azcliversion: ${{ env.AZURE_CLI_VERSION }}
           inlineScript: |
-            az storage blob upload ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} -n ${{ env.PLAN_FILE }}
+            az storage blob download ${{ env.AZURE_STORAGE_ARGS }} -f ${{ env.PLAN_NAME }} -n ${{ env.PLAN_FILE }}
 
       - uses: pulumi/actions@v5
         name: "Update Infrastructure"

@@ -1,4 +1,7 @@
 export PULUMI_CONFIG_PASSPHRASE=
+export GITHUB_OWNER=thaumazo
+
+pip install -r requirements.txt
 
 az login && \
     pulumi login azblob://iac?storage_account=thaumazodev || exit 1
